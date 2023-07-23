@@ -1,0 +1,42 @@
+Sub GenerateCombinations()
+    Dim ws As Worksheet
+    Dim newWs As Worksheet
+    Dim tickersRange As Range
+    Dim combinationsRange As Range
+    Dim tickerCell As Range
+    Dim combinationCell As Range
+    Dim rowIndex As Long
+    
+    ' Set the worksheet to work with
+    Set ws = ThisWorkbook.ActiveSheet
+    
+    ' Create a new worksheet for the combinations
+    Set newWs = ThisWorkbook.Sheets.Add(After:=ws)
+    newWs.Name = "data"
+    
+    ' Define the range of currency tickers in column A
+    Set tickersRange = ws.Range("B1:B" & ws.Cells(ws.Rows.Count, 1).End(xlUp).Row)
+    
+    ' Define the range to store the combinations
+    Set combinationsRange = newWs.Range("A1")
+    
+    ' Loop through each ticker in the range
+    For Each tickerCell In tickersRange
+        ' Loop through each ticker again to create combinations
+        For Each combinationCell In tickersRange
+            ' Exclude self-combinations
+            If combinationCell.Value <> tickerCell.Value Then
+                ' Write the combination in the new worksheet
+                combinationsRange.Offset(rowIndex).Value = tickerCell.Value & ":" & combinationCell.Value
+                rowIndex = rowIndex + 1
+            End If
+        Next combinationCell
+    Next tickerCell
+    
+    ' Autofit columns in the new worksheet
+    newWs.Columns.AutoFit
+    
+    ' Display a message with the number of combinations created
+    MsgBox "Combinations generated: " & rowIndex, vbInformation
+End Sub
+
