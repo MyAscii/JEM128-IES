@@ -1,0 +1,13 @@
+Sub RunPythonCMD()
+    Dim cmdPath As String
+    Dim pythonCmd As String
+    
+    ' Set the path to CMD.exe
+    cmdPath = Environ("COMSPEC")
+    
+    ' Set the Python command to execute
+    pythonCmd = "python C:\Users\Jeff\Desktop\Triangular_arbitrage\main.py"
+    
+    ' Run the Python command in CMD
+    Shell cmdPath & " /k " & pythonCmd, vbNormalFocus
+End Sub
