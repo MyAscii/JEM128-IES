@@ -1,0 +1,163 @@
+Sub CombineColumns()
+    Dim wsSource As Worksheet
+    Dim wsResult As Worksheet
+    Dim lastRow As Long, i As Long, newRow As Long
+    Dim keyValue As Variant
+    
+    Set wsSource = ThisWorkbook.Sheets(1)
+    
+    Set wsResult = ThisWorkbook.Sheets.Add(After:=ThisWorkbook.Sheets(ThisWorkbook.Sheets.Count))
+    wsResult.Name = "CombinedData"
+    
+    lastRow = wsSource.Cells(wsSource.Rows.Count, 1).End(xlUp).Row
+    
+    newRow = 1
+    
+    ' Loop through each row
+    For i = 2 To lastRow ' Start from 2 to skip the header row
+
+        keyValue = wsSource.Cells(i, 8).value
+        
+        wsResult.Cells(newRow, 1).value = wsSource.Cells(i, 1).value
+        wsResult.Cells(newRow, 2).value = keyValue
+        
+        wsResult.Cells(newRow + 1, 1).value = wsSource.Cells(i, 2).value
+        wsResult.Cells(newRow + 1, 2).value = keyValue
+        
+        wsResult.Cells(newRow + 2, 1).value = wsSource.Cells(i, 3).value
+        wsResult.Cells(newRow + 2, 2).value = keyValue
+        
+        newRow = newRow + 3  ' Increment the row for the next set of data
+    Next i
+End Sub
+
+Function CheckProfitabilityWithCount() As Boolean
+    Dim wsCombined As Worksheet
+    Dim wsResult As Worksheet
+    Dim lastRow As Long, i As Long
+    Dim dictProfitability As Object
+    Dim dictBetween0991 As Object
+    Dim dictLower099 As Object
+    Dim value As Variant, key As Variant
+    
+    
+    Set wsCombined = ThisWorkbook.Sheets("CombinedData")
+    
+    Set wsResult = ThisWorkbook.Sheets.Add(After:=ThisWorkbook.Sheets(ThisWorkbook.Sheets.Count))
+    wsResult.Name = "Result"
+    
+    lastRow = wsCombined.Cells(wsCombined.Rows.Count, 1).End(xlUp).Row
+    
+    Set dictProfitability = CreateObject("Scripting.Dictionary")
+    Set dictBetween0991 = CreateObject("Scripting.Dictionary")
+    Set dictLower099 = CreateObject("Scripting.Dictionary")
+    
+    ' Loop through each row
+    For i = 1 To lastRow
+        value = wsCombined.Cells(i, 1).value
+        Dim profitability As Double
+        profitability = wsCombined.Cells(i, 2).value
+        
+        ' Check if the profitability is between 1.01 and 0.99
+        If profitability <= 1.01 And profitability >= 0.99 Then
+            If Not dictBetween0991.Exists(value) Then
+                dictBetween0991.Add value, 1
+            Else
+                dictBetween0991(value) = dictBetween0991(value) + 1
+            End If
+        ElseIf profitability < 0.99 Then
+            ' Check if the profitability is lower than 0.99
+            If Not dictLower099.Exists(value) Then
+                dictLower099.Add value, 1
+            Else
+                dictLower099(value) = dictLower099(value) + 1
+            End If
+        End If
+        
+        ' Check if the profitability is above 1.01
+        If profitability > 1.01 Then
+            If Not dictProfitability.Exists(value) Then
+                dictProfitability.Add value, 1
+            Else
+                dictProfitability(value) = dictProfitability(value) + 1
+            End If
+        End If
+    Next i
+    
+    ' Sort dict
+    Set dictProfitability = SortDictionaryByValue(dictProfitability, False)
+    Set dictBetween0991 = SortDictionaryByValue(dictBetween0991, False)
+    Set dictLower099 = SortDictionaryByValue(dictLower099, False)
+    
+    ' Write the result
+    wsResult.Cells(1, 1).value = "Value"
+    wsResult.Cells(1, 2).value = "Count"
+    wsResult.Cells(1, 3).value = "Profitability"
+    
+    i = 2
+    For Each key In dictProfitability.Keys
+        wsResult.Cells(i, 1).value = key
+        wsResult.Cells(i, 2).value = dictProfitability(key)
+        wsResult.Cells(i, 3).value = "The currency is profitable(more than 1.01 of profits)"
+        i = i + 1
+    Next key
+    
+    For Each key In dictBetween0991.Keys
+        wsResult.Cells(i, 1).value = key
+        wsResult.Cells(i, 2).value = dictBetween0991(key)
+        wsResult.Cells(i, 3).value = "The currency is very liquid (between 1.01 and 0.99 of profits)"
+        i = i + 1
+    Next key
+    
+    For Each key In dictLower099.Keys
+        wsResult.Cells(i, 1).value = key
+        wsResult.Cells(i, 2).value = dictLower099(key)
+        wsResult.Cells(i, 3).value = "The currency is not profitable (less than 0.99 of profits)"
+        i = i + 1
+    Next key
+    
+    ' Autofit columns
+    wsResult.Columns("A:C").AutoFit
+    
+    ' check true
+    CheckProfitabilityWithCount = True
+End Function
+
+Function SortDictionaryByValue(dict As Object, Optional descending As Boolean = False) As Object
+    Dim arrKeys() As Variant
+    Dim arrValues() As Variant
+    Dim i As Long, j As Long
+    Dim temp As Variant
+
+    ' Convert dict to arr
+    arrKeys = dict.Keys
+    arrValues = dict.Items
+
+    ' bubble sort
+    For i = LBound(arrValues) To UBound(arrValues) - 1
+        For j = i + 1 To UBound(arrValues)
+            If (arrValues(i) < arrValues(j) And Not descending) Or (arrValues(i) > arrValues(j) And descending) Then
+                ' Swap values
+                temp = arrValues(i)
+                arrValues(i) = arrValues(j)
+                arrValues(j) = temp
+                
+                ' Swap keys accordingly
+                temp = arrKeys(i)
+                arrKeys(i) = arrKeys(j)
+                arrKeys(j) = temp
+            End If
+        Next j
+    Next i
+
+    Dim sortedDict As Object
+    Set sortedDict = CreateObject("Scripting.Dictionary")
+    
+    ' Add the sorted values to the dictionary
+    For i = LBound(arrKeys) To UBound(arrKeys)
+        sortedDict.Add arrKeys(i), arrValues(i)
+    Next i
+
+    Set SortDictionaryByValue = sortedDict
+End Function
+
