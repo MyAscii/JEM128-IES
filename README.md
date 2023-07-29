@@ -20,15 +20,18 @@ The other requirements:
 
 Arbitrage.xlsm = File used for the Python code to run its calculation, work with CMD, or manually by running the main.py <br>
 Arbitrage_Opportunities.xlsx = Result of the Python code <br>
+Arbitrage_Opportunities_Analyzed.xlsm = result of the VBA analysis code <br>
 README.md = Explanation of the project <br>
 main.py = python algorithm <br>
 pre-data.xlsm = initial data from which the project is based on <br>
 raw_code_PythonCMD.txt = raw VBA code to run the shell <br>
+raw_code_analyze.txt = raw VBA code for the analysis <br>
 raw_code_combination.txt = raw VBA code for the processing of the data from pre-data.xlsm to Arbitrage.xlsm
-
 
 ## Why Python?
 The project was fully in VBA at the start but the computation time was extremely slow and sometimes didn't work at all, even though Python isn't known for its speed, it was more stable and way more quicker to execute the required calculation. 
+
+# About the project
 
 ## Getting the data
 First I started with a list of the most used currencies that I found on the internet (See the pre-data.xlsm, tab raw) and modified it so I have just the tickers in column B.
