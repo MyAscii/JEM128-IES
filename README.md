@@ -46,3 +46,7 @@ To get the latest price data for the currency pair, I used the built-in Excel pr
 Open arbitrage.xlsm, import your new data or use the old data, after you need to modify the path in visual basic code, and put the correct path where is the python file situated. After everything is done you can click to run the script. It will open a CMD command line and write some commands to run the Python script. If this seems scary to you, you can run the Python file separately. 
 
 The output of the files is named Arbitrage_Opportunities.xlsx
+
+## Data analysis
+Once the is available you can run the analysis part, the code looks to find which currency is the most profitable, more liquid, or not profitable and count how many times each appear in each category. <br> 
+It will give the result in a new sheet, as in the example (Arbitrage_Opportunities_Analyzed.xlsm).  
